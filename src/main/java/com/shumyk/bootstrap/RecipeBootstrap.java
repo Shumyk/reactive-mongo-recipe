@@ -1,7 +1,6 @@
 package com.shumyk.bootstrap;
 
 import com.shumyk.domain.*;
-import com.shumyk.domain.*;
 import com.shumyk.repositories.CategoryRepository;
 import com.shumyk.repositories.RecipeRepository;
 import com.shumyk.repositories.UnitOfMeasureRepository;
