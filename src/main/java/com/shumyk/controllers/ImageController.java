@@ -3,6 +3,7 @@ package com.shumyk.controllers;
 import com.shumyk.commands.RecipeCommand;
 import com.shumyk.services.ImageService;
 import com.shumyk.services.RecipeService;
+import lombok.AllArgsConstructor;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,23 +18,16 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * Created by jt on 7/3/17.
- */
 @Controller
+@AllArgsConstructor
 public class ImageController {
 
     private final ImageService imageService;
     private final RecipeService recipeService;
 
-    public ImageController(ImageService imageService, RecipeService recipeService) {
-        this.imageService = imageService;
-        this.recipeService = recipeService;
-    }
-
     @GetMapping("recipe/{id}/image")
     public String showUploadForm(@PathVariable String id, Model model){
-        model.addAttribute("recipe", recipeService.findCommandById(id));
+        model.addAttribute("recipe", recipeService.findCommandById(id).block());
 
         return "recipe/imageuploadform";
     }
@@ -41,7 +35,7 @@ public class ImageController {
     @PostMapping("recipe/{id}/image")
     public String handleImagePost(@PathVariable String id, @RequestParam("imagefile") MultipartFile file){
 
-        imageService.saveImageFile(id, file);
+        imageService.saveImageFile(id, file).block();
 
         return "redirect:/recipe/" + id + "/show";
     }

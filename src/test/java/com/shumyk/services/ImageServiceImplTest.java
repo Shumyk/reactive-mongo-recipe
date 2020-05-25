@@ -1,7 +1,7 @@
 package com.shumyk.services;
 
 import com.shumyk.domain.Recipe;
-import com.shumyk.repositories.RecipeRepository;
+import com.shumyk.repositories.reactive.RecipeReactiveRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -9,8 +9,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.Optional;
+import reactor.core.publisher.Mono;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
@@ -18,9 +17,7 @@ import static org.mockito.Mockito.*;
 
 public class ImageServiceImplTest {
 
-    @Mock
-    RecipeRepository recipeRepository;
-
+    @Mock RecipeReactiveRepository recipeRepository;
     ImageService imageService;
 
     @Before
@@ -39,9 +36,9 @@ public class ImageServiceImplTest {
 
         Recipe recipe = new Recipe();
         recipe.setId(id);
-        Optional<Recipe> recipeOptional = Optional.of(recipe);
 
-        when(recipeRepository.findById(anyString())).thenReturn(recipeOptional);
+        when(recipeRepository.findById(anyString())).thenReturn(Mono.just(recipe));
+        when(recipeRepository.save(any())).thenReturn(Mono.empty());
 
         ArgumentCaptor<Recipe> argumentCaptor = ArgumentCaptor.forClass(Recipe.class);
 
