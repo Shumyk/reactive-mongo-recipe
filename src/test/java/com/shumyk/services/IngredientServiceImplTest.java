@@ -1,18 +1,20 @@
 package com.shumyk.services;
 
 import com.shumyk.commands.IngredientCommand;
+import com.shumyk.converters.IngredientCommandToIngredient;
 import com.shumyk.converters.IngredientToIngredientCommand;
 import com.shumyk.converters.UnitOfMeasureCommandToUnitOfMeasure;
 import com.shumyk.converters.UnitOfMeasureToUnitOfMeasureCommand;
 import com.shumyk.domain.Ingredient;
 import com.shumyk.domain.Recipe;
-import com.shumyk.converters.IngredientCommandToIngredient;
 import com.shumyk.repositories.RecipeRepository;
-import com.shumyk.repositories.UnitOfMeasureRepository;
+import com.shumyk.repositories.reactive.RecipeReactiveRepository;
+import com.shumyk.repositories.reactive.UnitOfMeasureReactiveRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
@@ -25,11 +27,9 @@ public class IngredientServiceImplTest {
     private final IngredientToIngredientCommand ingredientToIngredientCommand;
     private final IngredientCommandToIngredient ingredientCommandToIngredient;
 
-    @Mock
-    RecipeRepository recipeRepository;
-
-    @Mock
-    UnitOfMeasureRepository unitOfMeasureRepository;
+    @Mock RecipeRepository recipeRepository;
+    @Mock RecipeReactiveRepository recipeReactiveRepository;
+    @Mock UnitOfMeasureReactiveRepository unitOfMeasureRepository;
 
     IngredientService ingredientService;
 
@@ -44,7 +44,7 @@ public class IngredientServiceImplTest {
         MockitoAnnotations.initMocks(this);
 
         ingredientService = new IngredientServiceImpl(ingredientToIngredientCommand, ingredientCommandToIngredient,
-                recipeRepository, unitOfMeasureRepository);
+                recipeReactiveRepository, recipeRepository, unitOfMeasureRepository);
     }
 
     @Test
@@ -52,7 +52,7 @@ public class IngredientServiceImplTest {
     }
 
     @Test
-    public void findByRecipeIdAndReceipeIdHappyPath() throws Exception {
+    public void findByRecipeIdAndRecipeIdHappyPath() throws Exception {
         //given
         Recipe recipe = new Recipe();
         recipe.setId("1");
@@ -69,16 +69,15 @@ public class IngredientServiceImplTest {
         recipe.addIngredient(ingredient1);
         recipe.addIngredient(ingredient2);
         recipe.addIngredient(ingredient3);
-        Optional<Recipe> recipeOptional = Optional.of(recipe);
 
-        when(recipeRepository.findById(anyString())).thenReturn(recipeOptional);
+        when(recipeReactiveRepository.findById(anyString())).thenReturn(Mono.just(recipe));
 
         //then
-        IngredientCommand ingredientCommand = ingredientService.findByRecipeIdAndIngredientId("1", "3");
+        IngredientCommand ingredientCommand = ingredientService.findByRecipeIdAndIngredientId("1", "3").block();
 
         //when
         assertEquals("3", ingredientCommand.getId());
-        verify(recipeRepository, times(1)).findById(anyString());
+        verify(recipeReactiveRepository).findById(anyString());
     }
 
 
@@ -99,7 +98,7 @@ public class IngredientServiceImplTest {
         when(recipeRepository.save(any())).thenReturn(savedRecipe);
 
         //when
-        IngredientCommand savedCommand = ingredientService.saveIngredientCommand(command);
+        IngredientCommand savedCommand = ingredientService.saveIngredientCommand(command).block();
 
         //then
         assertEquals("3", savedCommand.getId());
