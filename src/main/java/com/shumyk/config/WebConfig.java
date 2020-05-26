@@ -14,8 +14,7 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
 @Configuration
 public class WebConfig {
 
-    @Bean
-    RouterFunction<ServerResponse> routes(final RecipeService recipeService) {
+    @Bean public RouterFunction<ServerResponse> routes(final RecipeService recipeService) {
         return RouterFunctions.route(
                 GET("/api/recipes"),
                 serverRequest -> ServerResponse.ok()
