@@ -2,6 +2,7 @@ package com.shumyk.controllers;
 
 import com.shumyk.commands.RecipeCommand;
 import com.shumyk.services.RecipeService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,25 +14,19 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import javax.validation.Valid;
 
-/**
- * Created by jt on 6/19/17.
- */
 @Slf4j
 @Controller
+@AllArgsConstructor
 public class RecipeController {
 
     private static final String RECIPE_RECIPEFORM_URL = "recipe/recipeform";
-    private final RecipeService recipeService;
 
-    public RecipeController(RecipeService recipeService) {
-        this.recipeService = recipeService;
-    }
+    private final RecipeService recipeService;
 
     @GetMapping("/recipe/{id}/show")
     public String showById(@PathVariable String id, Model model){
 
-        model.addAttribute("recipe", recipeService.findById(id).block());
-
+        model.addAttribute("recipe", recipeService.findById(id));
         return "recipe/show";
     }
 
@@ -52,11 +47,7 @@ public class RecipeController {
     public String saveOrUpdate(@Valid @ModelAttribute("recipe") RecipeCommand command, BindingResult bindingResult){
 
         if(bindingResult.hasErrors()){
-
-            bindingResult.getAllErrors().forEach(objectError -> {
-                log.debug(objectError.toString());
-            });
-
+            bindingResult.getAllErrors().forEach(objectError -> log.debug(objectError.toString()));
             return RECIPE_RECIPEFORM_URL;
         }
 
